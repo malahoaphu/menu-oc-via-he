@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Ốc Vỉa Hè</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <header>
+        <div class="menu-icon" onclick="openSidebar()">&#9776;</div>
+        <div class="title">Menu Ốc Vỉa Hè - Bàn <span id="table-number">?</span></div>
+                <div class="icons">
+            <i class="fas fa-search"></i>
+            <div class="cart-icon-wrapper">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cart-badge" class="cart-badge">0</span>
+            </div>
+            <a href="admin.html" class="admin-link" title="Quản trị Admin"><i class="fas fa-user-shield"></i></a>
+        </div>
+    </header>
+
+    <!-- Container chứa menu danh mục và món -->
+    <div id="menu-container"></div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">&times;</a>
+        <a href="admin.html">Quản Trị Admin</a>
+        <a href="javascript:void(0)" onclick="backToTables()">Quay Lại Chọn Bàn</a>
+    </div>
+
+    <!-- Modal ghi chú cho bàn -->
+    <div id="note-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeNoteModal()">&times;</span>
+            <h2>Ghi Chú Cho Bàn</h2>
+            <textarea id="table-note" placeholder="Ví dụ: Ít cay, thêm chanh, không hành..."></textarea>
+            <button onclick="saveNote()">Lưu Ghi Chú</button>
+        </div>
+    </div>
+
+    <!-- Giỏ hàng fixed dưới cùng -->
+    <div id="cart">
+        <div id="cart-title">Giỏ hàng</div>
+        <div id="cart-items">
+            <div id="cart-empty">Chưa có món nào</div>
+        </div>
+
+        <!-- Nút Quay Lại Chọn Bàn (luôn hiện) -->
+        <button id="back-to-tables-btn" onclick="backToTables()" class="cart-btn" title="">
+            Quay Lại Chọn Bàn
+        </button>
+        <!-- Nút Xác Nhận Món -->
+        <button id="confirm-order" onclick="confirmOrder()" class="cart-btn confirm">
+            Xác Nhận Món
+        </button>
+
+        <!-- Icon ghi chú -->
+        <i class="fas fa-sticky-note note-icon" onclick="openNoteModal()" title="Ghi chú cho bàn"></i>
+
+        <!-- Thông báo sau khi xác nhận (ẩn lúc đầu) -->
+        <div id="confirmed-message" style="display:none; text-align:center; margin-top:15px;">
+            <p style="color:#00ff00; font-size:18px; font-weight:bold;">
+                Đơn hàng bàn <span id="confirmed-table"></span> đã gửi bếp thành công!
+            </p>
+            <button onclick="backToTables()" class="cart-btn" style="background:#ff6600;">
+                Quay Lại Chọn Bàn
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

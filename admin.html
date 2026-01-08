@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Menu Ốc Vỉa Hè</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #111; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
+        h1 { text-align: center; margin: 30px 0; color: #ff6600; font-size: 28px; }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+        .tab-btn {
+            padding: 12px 30px;
+            background: #222;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: #ff6600;
+            font-weight: bold;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        #login-form { max-width: 400px; margin: 100px auto; padding: 30px; background: #222; border-radius: 15px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        #login-form input[type="password"] { width: 100%; padding: 15px; margin: 20px 0; border-radius: 30px; border: none; font-size: 18px; background: #333; color: white; }
+        #login-form button { padding: 15px 40px; background: #ff6600; color: white; border: none; border-radius: 30px; font-size: 18px; cursor: pointer; }
+
+        #admin-panel { display: none; }
+        .btn-logout { position: fixed; top: 20px; right: 20px; background: #ff3300; padding: 10px 15px; border-radius: 8px; color: white; text-decoration: none; }
+        .change-password-btn { position: fixed; top: 20px; left: 20px; background: #0066cc; padding: 10px 15px; border-radius: 8px; color: white; text-decoration: none; font-size: 14px; }
+
+        .add-category-btn { padding: 12px 24px; background: #ff6600; border: none; border-radius: 30px; color: white; font-size: 18px; cursor: pointer; margin: 30px auto; display: block; }
+
+        .category-admin { background: #222; padding: 20px; margin-bottom: 30px; border-radius: 15px; border: 1px solid #444; }
+        .category-admin h3 { color: #ff6600; margin-bottom: 15px; }
+        .dish-admin { background: #333; padding: 15px; margin: 10px 0; border-radius: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .dish-admin input { padding: 10px; background: #111; border: 1px solid #444; color: white; border-radius: 8px; }
+        .dish-admin button, .category-admin button { background: #ff6600; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; align-self: flex-start; }
+        .delete-btn { background: #ff3300 !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Form đăng nhập -->
+    <div id="login-form">
+        <h2>Đăng Nhập Admin</h2>
+        <input type="password" id="admin-password" placeholder="Nhập mật khẩu hiện tại">
+        <button onclick="checkPassword()">Đăng Nhập</button>
+    </div>
+
+    <!-- Giao diện chính admin -->
+    <div id="admin-panel">
+        <a href="index.html" class="btn-logout">Đăng Xuất</a>
+        <!-- Nút đổi mật khẩu -->
+        <button class="change-password-btn" onclick="openChangePassword()">Đổi Mật Khẩu</button>
+
+        <h1>Quản Lý Hệ Thống</h1>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn" onclick="openTab('orders')">Xem Đơn Hàng</button>
+            <button class="tab-btn" onclick="openTab('menu')">Quản Lý Menu</button>
+        </div>
+
+        <!-- Tab Xem Đơn Hàng (mở mặc định) -->
+        <div id="orders-tab" class="tab-content active">
+            <h2 style="color:#ff6600; text-align:center; margin:30px 0;">Đơn Hàng Theo Bàn</h2>
+            <div id="orders-view"></div>
+        </div>
+
+        <!-- Tab Quản Lý Menu -->
+        <div id="menu-tab" class="tab-content">
+            <button class="add-category-btn" onclick="addCategory()">+ Thêm Danh Mục Mới</button>
+            <div id="admin-categories"></div>
+
+            <div style="text-align: center; margin: 50px 0;">
+                <button onclick="saveChanges()" style="padding: 15px 30px; font-size: 18px; background: #00aa00; border: none; border-radius: 30px; cursor: pointer;">
+                    XÁC NHẬN & LƯU THAY ĐỔI MENU
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal đổi mật khẩu -->
+               <!-- Modal đổi mật khẩu -->
+        <div id="change-password-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeChangePassword()">&times;</span>
+                <h2>Đổi Mật Khẩu Admin</h2>
+                <input type="password" id="old-password" placeholder="Mật khẩu cũ"><br><br>
+                <input type="password" id="new-password" placeholder="Mật khẩu mới (ít nhất 6 ký tự)"><br><br>
+                <input type="password" id="confirm-password" placeholder="Xác nhận mật khẩu mới"><br><br>
+                
+                <div style="text-align:center; margin-top:20px;">
+                    <button onclick="changePassword()" style="padding:12px 30px; background:#00aa00; border:none; border-radius:30px; color:white; font-size:16px; cursor:pointer; margin-right:15px;">
+                        Đổi Mật Khẩu
+                    </button>
+                    <button onclick="closeChangePassword()" style="padding:12px 30px; background:#888; border:none; border-radius:30px; color:white; font-size:16px; cursor:pointer;">
+                        Hủy
+                    </button>
+                </div>
+            </div>
+        </div>
+                <!-- Modal Thêm Món Mới -->
+        <div id="add-dish-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeAddDishModal()">&times;</span>
+                <h2>Thêm Món Mới</h2>
+                
+                <input type="text" id="new-dish-name" placeholder="Tên món (bắt buộc)" style="width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #444; background:#333; color:white; font-size:16px;"><br>
+                
+                <input type="text" id="new-dish-img" placeholder="Link ảnh (URL, bắt buộc)" style="width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #444; background:#333; color:white; font-size:16px;"><br>
+                
+                <input type="number" id="new-dish-price" placeholder="Giá tiền (nhập 00 nếu báo giá trong ngày)" value="0" min="0" style="width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #444; background:#333; color:white; font-size:16px;"><br>
+                
+                <textarea id="new-dish-note" placeholder="Ghi chú (tùy chọn, ví dụ: Liên hệ báo giá trong ngày)" style="width:100%; height:80px; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #444; background:#333; color:white; font-size:16px; resize:vertical;"></textarea>
+                
+                <div style="text-align:center; margin-top:20px;">
+                    <button onclick="confirmAddDish()" style="padding:12px 30px; background:#00aa00; border:none; border-radius:30px; color:white; font-size:16px; cursor:pointer; margin-right:15px;">
+                        Xác Nhận Thêm Món
+                    </button>
+                    <button onclick="closeAddDishModal()" style="padding:12px 30px; background:#888; border:none; border-radius:30px; color:white; font-size:16px; cursor:pointer;">
+                        Hủy
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    <script src="admin-script.js"></script>
+
+    <script>
+        // Lấy mật khẩu hiện tại từ LocalStorage (mặc định 20062003 nếu chưa có)
+        const currentAdminPassword = localStorage.getItem('admin_password') || '20062003';
+
+        function checkPassword() {
+            const input = document.getElementById('admin-password').value.trim();
+            if (input === currentAdminPassword) {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'block';
+                // Mở tab Đơn Hàng trước
+                openTab('orders');
+                renderOrders();
+            } else {
+                alert('Mật khẩu sai! Thử lại.');
+                document.getElementById('admin-password').value = '';
+            }
+        }
+
+        document.getElementById('admin-password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkPassword();
+        });
+
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabName + '-tab').classList.add('active');
+            document.querySelector(`.tab-btn[onclick="openTab('${tabName}')"]`).classList.add('active');
+
+            if (tabName === 'menu') renderAdmin();
+            if (tabName === 'orders') renderOrders();
+        }
+
+        // Modal đổi mật khẩu
+        function openChangePassword() {
+            document.getElementById('change-password-modal').style.display = 'flex';
+        }
+
+        function closeChangePassword() {
+            document.getElementById('change-password-modal').style.display = 'none';
+            document.getElementById('old-password').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('confirm-password').value = '';
+        }
+
+        function changePassword() {
+            const oldPass = document.getElementById('old-password').value;
+            const newPass = document.getElementById('new-password').value;
+            const confirmPass = document.getElementById('confirm-password').value;
+
+            if (oldPass !== currentAdminPassword) {
+                alert('Mật khẩu cũ không đúng!');
+                return;
+            }
+            if (newPass.length < 6) {
+                alert('Mật khẩu mới phải ít nhất 6 ký tự!');
+                return;
+            }
+            if (newPass !== confirmPass) {
+                alert('Xác nhận mật khẩu mới không khớp!');
+                return;
+            }
+
+            localStorage.setItem('admin_password', newPass);
+            alert('Đổi mật khẩu thành công! Lần sau đăng nhập dùng mật khẩu mới.');
+            closeChangePassword();
+        }
+    </script>
+</body>
+</html>
