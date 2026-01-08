@@ -113,19 +113,30 @@
                 </div>
             </div>
         </div>
-                <!-- Modal Thêm Món Mới -->
+                       <!-- Modal Thêm Món Mới (cập nhật có tải ảnh + preview) -->
         <div id="add-dish-modal" class="modal" style="display:none;">
-            <div class="modal-content">
+            <div class="modal-content" style="max-width:90%; width:500px;">
                 <span class="close-modal" onclick="closeAddDishModal()">&times;</span>
-                <h2>Thêm Món Mới</h2>
+                <h2>Thêm Món Mới Vào Danh Mục</h2>
                 
                 <input type="text" id="new-dish-name" placeholder="Tên món (bắt buộc)" style="width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #444; background:#333; color:white; font-size:16px;"><br>
                 
-                <input type="text" id="new-dish-img" placeholder="Link ảnh (URL, bắt buộc)" style="width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #444; background:#333; color:white; font-size:16px;"><br>
+                <!-- Tải ảnh từ máy hoặc nhập URL -->
+                <div style="margin:15px 0;">
+                    <label style="color:#ff6600; font-weight:bold;">Ảnh món:</label><br>
+                    <input type="file" id="new-dish-file" accept="image/*" style="margin:10px 0; color:white;"><br>
+                    <small style="color:#aaa;">Hoặc nhập URL ảnh:</small>
+                    <input type="text" id="new-dish-img" placeholder="Dán link ảnh nếu không tải file" style="width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #444; background:#333; color:white; font-size:16px;">
+                </div>
+
+                <!-- Preview ảnh -->
+                <div style="text-align:center; margin:15px 0;">
+                    <img id="dish-preview" src="" alt="Preview ảnh" style="max-width:100%; max-height:200px; border-radius:10px; display:none; border:2px dashed #ff6600;">
+                </div>
                 
                 <input type="number" id="new-dish-price" placeholder="Giá tiền (nhập 00 nếu báo giá trong ngày)" value="0" min="0" style="width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #444; background:#333; color:white; font-size:16px;"><br>
                 
-                <textarea id="new-dish-note" placeholder="Ghi chú (tùy chọn, ví dụ: Liên hệ báo giá trong ngày)" style="width:100%; height:80px; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #444; background:#333; color:white; font-size:16px; resize:vertical;"></textarea>
+                <textarea id="new-dish-note" placeholder="Ghi chú (tùy chọn, ví dụ: Báo giá trong ngày)" style="width:100%; height:80px; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #444; background:#333; color:white; font-size:16px; resize:vertical;"></textarea>
                 
                 <div style="text-align:center; margin-top:20px;">
                     <button onclick="confirmAddDish()" style="padding:12px 30px; background:#00aa00; border:none; border-radius:30px; color:white; font-size:16px; cursor:pointer; margin-right:15px;">
