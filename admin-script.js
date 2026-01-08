@@ -1,4 +1,4 @@
-// admin-script.js - Toàn bộ logic cho trang admin (hoàn chỉnh)
+// admin-script.js - Toàn bộ logic cho trang admin (phiên bản hoàn chỉnh với tải ảnh + preview)
 
 let categories = JSON.parse(localStorage.getItem('categories')) || [
     { name: 'Nghêu', dishes: [
@@ -16,7 +16,8 @@ let categories = JSON.parse(localStorage.getItem('categories')) || [
     ]}
 ];
 
-let currentCatIndex = null; // Lưu tạm danh mục đang thêm món
+let currentCatIndex = null; // Lưu danh mục đang thêm món
+let currentDishImageData = ''; // Lưu tạm ảnh (base64 hoặc URL)
 
 // ==================== ĐĂNG NHẬP ====================
 function checkPassword() {
@@ -95,29 +96,64 @@ function deleteCategory(idx) {
     }
 }
 
-// Modal thêm món
+// ==================== MODAL THÊM MÓN (TẢI ẢNH + PREVIEW) ====================
 function addDish(catIdx) {
     currentCatIndex = catIdx;
+    currentDishImageData = '';
+
     document.getElementById('new-dish-name').value = '';
     document.getElementById('new-dish-img').value = '';
     document.getElementById('new-dish-price').value = '0';
     document.getElementById('new-dish-note').value = '';
+    document.getElementById('dish-preview').style.display = 'none';
+    document.getElementById('dish-preview').src = '';
+
     document.getElementById('add-dish-modal').style.display = 'flex';
 }
 
 function closeAddDishModal() {
     document.getElementById('add-dish-modal').style.display = 'none';
     currentCatIndex = null;
+    currentDishImageData = '';
 }
+
+// Xử lý tải ảnh từ file (điện thoại/máy tính)
+document.getElementById('new-dish-file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            currentDishImageData = event.target.result;
+            document.getElementById('dish-preview').src = currentDishImageData;
+            document.getElementById('dish-preview').style.display = 'block';
+            document.getElementById('new-dish-img').value = ''; // Xóa URL nếu đang có
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Xử lý nhập URL ảnh (preview URL)
+document.getElementById('new-dish-img').addEventListener('input', function(e) {
+    const url = e.target.value.trim();
+    if (url) {
+        currentDishImageData = url;
+        document.getElementById('dish-preview').src = url;
+        document.getElementById('dish-preview').style.display = 'block';
+    }
+});
 
 function confirmAddDish() {
     const name = document.getElementById('new-dish-name').value.trim();
-    const img = document.getElementById('new-dish-img').value.trim();
     const price = Number(document.getElementById('new-dish-price').value);
     const note = document.getElementById('new-dish-note').value.trim();
 
-    if (!name || !img) {
-        alert('Vui lòng nhập đầy đủ Tên món và Link ảnh!');
+    if (!name) {
+        alert('Vui lòng nhập tên món!');
+        return;
+    }
+
+    if (!currentDishImageData) {
+        alert('Vui lòng chọn ảnh từ máy hoặc nhập URL ảnh!');
         return;
     }
 
@@ -128,7 +164,7 @@ function confirmAddDish() {
 
     categories[currentCatIndex].dishes.push({
         name: name,
-        img: img,
+        img: currentDishImageData, // base64 hoặc URL
         price: price,
         note: note
     });
@@ -158,12 +194,12 @@ function saveChanges() {
             if (nameIn) dish.name = nameIn.value.trim();
             if (imgIn) dish.img = imgIn.value.trim();
             if (priceIn) dish.price = Number(priceIn.value) || 0;
-            if (noteIn) dish.note = noteIn.value.trim(); // Cập nhật ghi chú
+            if (noteIn) dish.note = noteIn.value.trim();
         });
     });
 
     localStorage.setItem('categories', JSON.stringify(categories));
-    alert('Đã lưu tất cả thay đổi thành công! Ghi chú đã được cập nhật.');
+    alert('Đã lưu tất cả thay đổi thành công!\nẢnh và ghi chú đã được cập nhật.');
 }
 
 // ==================== XEM ĐƠN HÀNG THEO BÀN ====================
@@ -206,5 +242,5 @@ function clearTableOrder(table) {
 
 // ==================== KHỞI ĐỘNG ====================
 document.addEventListener('DOMContentLoaded', () => {
-    // Không tự render gì, chờ đăng nhập
+    // Không tự render, chờ đăng nhập
 });
