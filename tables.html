@@ -6,6 +6,7 @@
     <title>Chọn Bàn - Menu Ốc Vỉa Hè</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="module" src="firebase.js"></script>
     <style>
         body { 
             background: #000; 
@@ -64,29 +65,40 @@
     <h1>Chọn số bàn từ 1 đến 20</h1>
     <div class="table-grid" id="table-grid"></div>
 
-    <script>
-        function renderTables() {
-            const grid = document.getElementById('table-grid');
-            grid.innerHTML = '';
-            const orders = JSON.parse(localStorage.getItem('orders')) || {};
+    <script type="module">
+    import { db, ref, onValue } from "./firebase.js";
 
-            for (let i = 1; i <= 20; i++) {
-                const btn = document.createElement('div');
-                btn.className = 'table-btn';
-                btn.textContent = `Bàn ${i}`;
+    function renderTables(orders = {}) {
+        const grid = document.getElementById('table-grid');
+        grid.innerHTML = '';
 
-                if (orders[i]) {
-                    btn.classList.add('occupied');
-                } else {
-                    btn.classList.add('available');
-                    btn.onclick = () => window.location.href = `index.html?table=${i}`;
-                }
+        for (let i = 1; i <= 20; i++) {
+            const btn = document.createElement('div');
+            btn.className = 'table-btn';
+            btn.textContent = `Bàn ${i}`;
 
-                grid.appendChild(btn);
+            if (orders[i]) {
+                btn.classList.add('occupied');
+                btn.title = 'Bàn đã có đơn hàng';
+                // Không cho click (disable)
+                btn.style.cursor = 'not-allowed';
+                btn.style.opacity = '0.6';
+            } else {
+                btn.classList.add('available');
+                btn.onclick = () => location.href = `index.html?table=${i}`;
             }
-        }
 
-        renderTables();
-    </script>
+            grid.appendChild(btn);
+        }
+    }
+
+    // Đọc đơn hàng từ node /orders
+    const ordersRef = ref(db, 'orders');
+    onValue(ordersRef, (snapshot) => {
+        const orders = snapshot.val() || {};
+        renderTables(orders);
+    });
+</script>
+
 </body>
 </html>
