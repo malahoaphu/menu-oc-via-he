@@ -6,6 +6,7 @@
     <title>Menu Ốc Vỉa Hè</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="module" src="firebase.js"></script>
 </head>
 <body>
 
@@ -26,11 +27,11 @@
     <div id="menu-container"></div>
 
     <!-- Sidebar -->
-    <div id="sidebar" class="sidebar">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">&times;</a>
-        <a href="admin.html">Quản Trị Admin</a>
-        <a href="javascript:void(0)" onclick="backToTables()">Quay Lại Chọn Bàn</a>
-    </div>
+   <div id="sidebar" class="sidebar">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">&times;</a>
+    <a href="admin.html">Quản Trị Admin</a>
+    <a href="javascript:void(0)" onclick="backToTables()">Quay Lại Chọn Bàn</a>
+</div>
 
     <!-- Modal ghi chú cho bàn -->
     <div id="note-modal" class="modal" style="display:none;">
@@ -72,6 +73,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
+
 </body>
 </html>
