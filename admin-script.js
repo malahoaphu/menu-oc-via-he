@@ -1,10 +1,10 @@
-// admin-script.js - Toàn bộ logic cho trang admin (fix lưu giá & đơn hàng hiển thị)
+// admin-script.js - Toàn bộ logic cho trang admin (chữ to, khoảng cách rộng, thêm món cho bàn)
 
 import { db, ref, onValue, set, remove } from "./firebase.js";
 
 let categories = [];
 
-// Lắng nghe realtime từ root (cấu trúc 0,1,2 trực tiếp ở root cho menu)
+// Lắng nghe realtime từ root (menu danh mục 0,1,2...)
 const rootRef = ref(db, '/');
 onValue(rootRef, (snapshot) => {
     const data = snapshot.val() || {};
@@ -186,7 +186,7 @@ function deleteDish(catIdx, dishIdx) {
 }
 
 function saveChanges() {
-    // Đọc giá trị từ input trước khi lưu (để lưu thay đổi giá/tên/note)
+    // Đọc giá trị từ input trước khi lưu
     categories.forEach((cat, catIdx) => {
         const nameInput = document.getElementById(`cat-${catIdx}-name`);
         if (nameInput) cat.name = nameInput.value.trim();
@@ -212,27 +212,25 @@ function saveChanges() {
 
     set(ref(db, '/'), data).then(() => {
         alert('Lưu thành công!');
-        renderAdmin(); // Refresh giao diện
+        renderAdmin();
     }).catch((error) => {
         alert('Lỗi lưu: ' + error.message);
     });
 }
 
 // ==================== XEM ĐƠN HÀNG ====================
-// ==================== XEM ĐƠN HÀNG ====================
 function renderOrders() {
     const container = document.getElementById('orders-view');
     if (!container) return;
     container.innerHTML = '<p style="text-align:center; color:#888;">Đang tải đơn hàng...</p>';
 
-    // Đọc từ node riêng /orders
     const ordersRef = ref(db, 'orders');
     onValue(ordersRef, (snapshot) => {
         const orders = snapshot.val() || {};
 
         container.innerHTML = '';
         if (Object.keys(orders).length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#888;">Chưa có đơn hàng nào.</p>';
+            container.innerHTML = '<p style="text-align:center; color:#888; font-size:18px;">Chưa có đơn hàng nào.</p>';
             return;
         }
 
@@ -241,12 +239,23 @@ function renderOrders() {
             const div = document.createElement('div');
             div.className = 'category-admin';
             div.innerHTML = `
-                <h3>Bàn ${table}</h3>
-                <p><strong>Ghi chú:</strong> ${order.note || '<i>Không có</i>'}</p>
-                <ul style="margin-left:20px;">
-                    ${Object.keys(order.items || {}).map(item => `<li>${item} × ${order.items[item]}</li>`).join('')}
+                <h3 style="font-size: 26px; color: #ff6600; margin-bottom: 18px;">Bàn ${table}</h3>
+                <p style="font-size: 18px; margin-bottom: 20px;"><strong>Ghi chú:</strong> ${order.note || '<i>Không có</i>'}</p>
+                <ul style="margin-left: 25px; font-size: 18px; line-height: 1.7; margin-bottom: 25px;">
+                    ${Object.keys(order.items || {}).map(item => `<li style="margin-bottom: 12px;">${item} × ${order.items[item]}</li>`).join('')}
                 </ul>
-                <button onclick="clearTableOrder('${table}')" class="delete-btn">Xóa Đơn Bàn Này</button>
+                ${order.addedItems ? `
+                    <p style="font-size: 18px; margin: 25px 0 15px 0; color: #00ff88;"><strong>Thêm:</strong></p>
+                    <ul style="margin-left: 25px; font-size: 18px; line-height: 1.7; color: #00ff88; margin-bottom: 25px;">
+                        ${Object.keys(order.addedItems).map(item => `<li style="margin-bottom: 12px;">${item} × ${order.addedItems[item]}</li>`).join('')}
+                    </ul>
+                ` : ''}
+                <div style="margin-top: 25px; display: flex; gap: 15px; flex-wrap: wrap;">
+                    <button onclick="clearTableOrder('${table}')" class="delete-btn" style="font-size: 16px; padding: 10px 20px;">Xóa Đơn Bàn Này</button>
+                    <button onclick="location.href='index.html?table=${table}&mode=add'" class="add-btn" style="font-size: 16px; padding: 10px 20px; background: #009900;">
+                        + Thêm Món Cho Bàn
+                    </button>
+                </div>
             `;
             container.appendChild(div);
         });
@@ -263,9 +272,9 @@ function clearTableOrder(table) {
     }
 }
 
-// Hủy đăng nhập, quay về trang menu khách
+// ==================== HỦY ĐĂNG NHẬP ====================
 function cancelLogin() {
-    window.location.href = 'index.html'; // Quay về trang menu (không đăng nhập)
+    window.location.href = 'index.html';
 }
 
 // ==================== KHỞI ĐỘNG ====================
@@ -273,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Không tự render, chờ đăng nhập
 });
 
-// Export hàm ra global scope để onclick trong HTML hoạt động
+// Export tất cả hàm ra global để onclick trong HTML hoạt động
 window.checkPassword = checkPassword;
 window.openTab = openTab;
 window.addCategory = addCategory;
