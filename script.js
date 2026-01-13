@@ -8,6 +8,7 @@ import { db, ref, onValue, set } from "./firebase.js";
 // ==================== LẤY SỐ BÀN TỪ URL ====================
 const urlParams = new URLSearchParams(window.location.search);
 const tableNumber = urlParams.get('table');
+const mode = urlParams.get('mode'); // 'add' nếu từ admin thêm món
 
 if (!tableNumber) {
     alert('Vui lòng chọn bàn trước khi vào menu!');
@@ -15,6 +16,16 @@ if (!tableNumber) {
 } else {
     const tableDisplay = document.getElementById('table-number');
     if (tableDisplay) tableDisplay.textContent = tableNumber;
+
+    // Nếu là chế độ thêm món từ admin
+    if (mode === 'add') {
+        document.querySelector('.title').textContent = `Thêm Món Cho Bàn ${tableNumber}`;
+        const confirmBtn = document.getElementById('confirm-order');
+        if (confirmBtn) {
+            confirmBtn.textContent = 'Thêm Món Vào Đơn';
+            confirmBtn.onclick = confirmAddToOrder; // Gán hàm thêm món
+        }
+    }
 }
 
 // ==================== DỮ LIỆU MENU TỪ FIREBASE ====================
@@ -36,6 +47,7 @@ onValue(rootRef, (snapshot) => {
     categories = [];
     renderMenu();
 });
+
 // ==================== RENDER MENU ====================
 function renderMenu() {
     const container = document.getElementById('menu-container');
@@ -43,7 +55,6 @@ function renderMenu() {
 
     container.innerHTML = '';
 
-    // Nếu chưa có data, hiển thị loading
     if (categories.length === 0) {
         container.innerHTML = '<p style="text-align:center; color:#888; font-size:18px;">Đang tải menu từ server...</p>';
         return;
@@ -80,7 +91,7 @@ function renderMenu() {
         container.appendChild(list);
     });
 
-    // Gắn sự kiện thêm món (an toàn cho module)
+    // Gắn sự kiện thêm món
     document.querySelectorAll('.add-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -200,20 +211,18 @@ function saveNote() {
     closeNoteModal();
 }
 
-// ==================== XÁC NHẬN ĐƠN HÀNG ====================
-// ==================== XÁC NHẬN ĐƠN HÀNG ====================
+// ==================== XÁC NHẬN ĐƠN HÀNG (CHẾ ĐỘ THƯỜNG) ====================
 function confirmOrder() {
     if (Object.keys(cart).length === 0) {
         alert('Giỏ hàng đang trống! Vui lòng chọn món trước.');
         return;
     }
 
-    // Lưu vào node riêng /orders/{số bàn}
-    const orderRef = ref(db, `orders/${tableNumber}`);
+    const orderRef = ref(db, tableNumber.toString());
     set(orderRef, {
         items: cart,
         note: localStorage.getItem(`table_${tableNumber}_note`) || '',
-        timestamp: Date.now() // Để sort theo thời gian nếu cần
+        timestamp: Date.now()
     }).then(() => {
         alert('Đơn hàng đã gửi bếp thành công!');
         cart = {};
@@ -246,6 +255,34 @@ function confirmOrder() {
     });
 }
 
+// ==================== THÊM MÓN CHO BÀN TỪ ADMIN (mode=add) ====================
+function confirmAddToOrder() {
+    if (Object.keys(cart).length === 0) {
+        alert('Chưa chọn món nào để thêm!');
+        return;
+    }
+
+    const orderRef = ref(db, `orders/${tableNumber}`);
+    onValue(orderRef, (snapshot) => {
+        const order = snapshot.val() || { items: {}, addedItems: {} };
+
+        if (!order.addedItems) order.addedItems = {};
+        Object.keys(cart).forEach(item => {
+            order.addedItems[item] = (order.addedItems[item] || 0) + cart[item];
+        });
+
+        set(orderRef, {
+            ...order,
+            addedItems: order.addedItems
+        }).then(() => {
+            alert('Đã thêm món vào đơn bàn!');
+            cart = {};
+            updateCart();
+            window.location.href = 'admin.html'; // Quay về trang admin
+        });
+    }, { onlyOnce: true });
+}
+
 // ==================== QUAY LẠI CHỌN BÀN ====================
 function backToTables() {
     window.location.href = 'tables.html';
@@ -259,12 +296,63 @@ function openSidebar() {
 function closeSidebar() {
     document.getElementById('sidebar').style.width = '0';
 }
+
 // Logout admin (xóa mật khẩu lưu tạm nếu có)
 function logoutAdmin() {
-    localStorage.removeItem('admin_password'); // Xóa mật khẩu lưu (nếu có)
+    localStorage.removeItem('admin_password');
     alert('Đã logout admin!');
-    window.location.href = 'index.html'; // Quay về trang menu
+    window.location.href = 'index.html';
 }
+
+// ==================== TÌM KIẾM ====================
+function toggleSearch() {
+    const searchBar = document.getElementById('search-bar');
+    const searchInput = document.getElementById('search-input');
+    
+    if (!searchBar || !searchInput) {
+        console.error("Không tìm thấy thanh tìm kiếm!");
+        return;
+    }
+    
+    if (searchBar.style.display === 'none' || searchBar.style.display === '') {
+        searchBar.style.display = 'block';
+        searchInput.focus();
+        searchInput.value = '';
+        filterCategories(''); // Hiện lại tất cả khi mở
+    } else {
+        searchBar.style.display = 'none';
+        searchInput.value = '';
+        filterCategories(''); // Hiện lại tất cả khi đóng
+    }
+}
+
+function filterCategories(query) {
+    query = query.toLowerCase().trim();
+    
+    document.querySelectorAll('.category-header').forEach(header => {
+        const categoryName = header.querySelector('span').textContent.toLowerCase();
+        const list = document.getElementById(header.nextElementSibling.id);
+        
+        if (categoryName.includes(query) || query === '') {
+            header.style.display = 'flex';
+            if (list) list.style.display = 'block';
+        } else {
+            header.style.display = 'none';
+            if (list) list.style.display = 'none';
+        }
+    });
+}
+
+// Gắn sự kiện tìm kiếm realtime
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            filterCategories(e.target.value);
+        });
+    }
+});
+
 // ==================== KHỞI ĐỘNG ====================
 renderMenu();
 updateCart();
@@ -274,6 +362,7 @@ window.addToCart = addToCart;
 window.removeFromCart = removeFromCart;
 window.updateCart = updateCart;
 window.confirmOrder = confirmOrder;
+window.confirmAddToOrder = confirmAddToOrder;
 window.openSidebar = openSidebar;
 window.closeSidebar = closeSidebar;
 window.backToTables = backToTables;
@@ -283,3 +372,4 @@ window.saveNote = saveNote;
 window.toggleCategory = toggleCategory;
 window.renderMenu = renderMenu;
 window.logoutAdmin = logoutAdmin;
+window.toggleSearch = toggleSearch;
