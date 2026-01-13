@@ -8,7 +8,7 @@ body {
     background-color: #000;
     color: #fff;
     font-family: Arial, Helvetica, sans-serif;
-    padding-bottom: 80px;
+    padding-bottom: 220px; /* Tăng padding-bottom để tránh bị giỏ hàng che */
 }
 
 header {
@@ -181,7 +181,7 @@ header {
     font-size: 36px;
 }
 
-/* Giỏ hàng */
+/* Giỏ hàng fixed dưới cùng - KHÔNG CHE MÓN CUỐI */
 #cart {
     position: fixed;
     bottom: 0;
@@ -189,8 +189,8 @@ header {
     right: 0;
     background-color: #111;
     padding: 15px;
-    max-height: 200px;
-    overflow-y: auto;
+    max-height: 220px; /* Giới hạn chiều cao tối đa */
+    overflow-y: auto; /* Cho phép cuộn nếu giỏ hàng dài */
     border-top: 1px solid #333;
     z-index: 1000;
 }
@@ -209,7 +209,6 @@ header {
     font-size: 16px;
     background-color: #222;
     padding: 8px 12px;
-    /**/
     border-radius: 8px;
 }
 
@@ -235,7 +234,7 @@ header {
     font-style: italic;
     text-align: center;
 }
-/**/
+
 /* Modal ghi chú */
 .modal {
     display: none;
@@ -298,10 +297,11 @@ header {
     cursor: pointer;
     color: #ff6600;
 }
+
 /* ==================== TỐI ƯU CHO ĐIỆN THOẠI (MOBILE) ==================== */
 @media (max-width: 768px) {
     body {
-        padding-bottom: 100px; /* Tăng chỗ cho giỏ hàng fixed */
+        padding-bottom: 220px; /* Tăng chỗ cho giỏ hàng fixed */
     }
 
     header {
@@ -466,7 +466,12 @@ header {
         padding: 20px;
         font-size: 18px;
     }
+
+    body {
+        padding-bottom: 250px; /* Tăng thêm cho mobile */
+    }
 }
+
 /* Badge số lượng trên icon giỏ hàng */
 .cart-icon-wrapper {
     position: relative;
@@ -501,4 +506,38 @@ header {
     font-style: italic;
     font-size: 14px;
     margin-top: 5px;
+}
+
+/* Đảm bảo menu không bị che bởi giỏ hàng fixed */
+#menu-container {
+    padding-bottom: 220px !important; /* Khoảng cách lớn hơn chiều cao giỏ hàng */
+    min-height: 100vh; /* Đầy màn hình */
+}
+
+/* Thanh tìm kiếm */
+#search-bar {
+    display: none;
+    padding: 15px 15px 0 15px;
+    background: #111;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+#search-input {
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 30px;
+    border: none;
+    background: #222;
+    color: white;
+    font-size: 16px;
+}
+
+#search-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #ff6600;
 }
